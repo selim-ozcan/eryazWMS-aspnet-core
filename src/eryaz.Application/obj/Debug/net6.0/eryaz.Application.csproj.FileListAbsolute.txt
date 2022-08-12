@@ -1,0 +1,17 @@
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Application.deps.json
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Application.dll
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Application.pdb
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Application.xml
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Core.dll
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/bin/Debug/net6.0/eryaz.Core.pdb
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.csproj.AssemblyReference.cache
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.AssemblyInfoInputs.cache
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.AssemblyInfo.cs
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.csproj.CoreCompileInputs.cache
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.csproj.CopyComplete
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.dll
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/refint/eryaz.Application.dll
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.xml
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/eryaz.Application.pdb
+/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/Debug/net6.0/ref/eryaz.Application.dll

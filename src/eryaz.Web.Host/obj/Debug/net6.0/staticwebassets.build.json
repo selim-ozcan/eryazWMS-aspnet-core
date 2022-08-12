@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "Hash": "zijsn3PnRTThxIM+yapjQsSfqzbTYFmW9Db4WW3+UqY=",
+  "Source": "eryaz.Web.Host",
+  "BasePath": "_content/eryaz.Web.Host",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "eryaz.Web.Host/wwwroot",
+      "Source": "eryaz.Web.Host",
+      "ContentRoot": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/wwwroot/",
+      "BasePath": "_content/eryaz.Web.Host",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/wwwroot/swagger/ui/abp.js",
+      "SourceId": "eryaz.Web.Host",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/wwwroot/",
+      "BasePath": "_content/eryaz.Web.Host",
+      "RelativePath": "swagger/ui/abp.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/swagger/ui/abp.js"
+    },
+    {
+      "Identity": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/wwwroot/swagger/ui/abp.swagger.js",
+      "SourceId": "eryaz.Web.Host",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/wwwroot/",
+      "BasePath": "_content/eryaz.Web.Host",
+      "RelativePath": "swagger/ui/abp.swagger.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/swagger/ui/abp.swagger.js"
+    }
+  ]
+}

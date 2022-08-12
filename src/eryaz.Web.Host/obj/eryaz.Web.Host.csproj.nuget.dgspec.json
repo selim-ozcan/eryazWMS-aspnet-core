@@ -1,0 +1,366 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/eryaz.Web.Host.csproj": {}
+  },
+  "projects": {
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj",
+        "projectName": "eryaz.Application",
+        "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj",
+        "packagesPath": "/Users/selim/.nuget/packages/",
+        "outputPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/selim/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj": {
+                "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "portable-net45+win8+wp8+wpa81",
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.400/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj",
+        "projectName": "eryaz.Core",
+        "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj",
+        "packagesPath": "/Users/selim/.nuget/packages/",
+        "outputPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/selim/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Abp.AutoMapper": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Abp.ZeroCore.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Castle.Windsor.MsDependencyInjection": {
+              "target": "Package",
+              "version": "[3.4.0, )"
+            }
+          },
+          "imports": [
+            "portable-net45+win8+wp8+wpa81",
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.400/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj",
+        "projectName": "eryaz.EntityFrameworkCore",
+        "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj",
+        "packagesPath": "/Users/selim/.nuget/packages/",
+        "outputPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/selim/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj": {
+                "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Core/eryaz.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.4, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[6.0.4, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.4, )"
+            }
+          },
+          "imports": [
+            "portable-net45+win8+wp8+wpa81",
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.400/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/eryaz.Web.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/eryaz.Web.Core.csproj",
+        "projectName": "eryaz.Web.Core",
+        "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/eryaz.Web.Core.csproj",
+        "packagesPath": "/Users/selim/.nuget/packages/",
+        "outputPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/selim/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj": {
+                "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj"
+              },
+              "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj": {
+                "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Abp.AspNetCore": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Abp.AspNetCore.SignalR": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Abp.ZeroCore": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[6.0.4, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.3.1, )"
+            }
+          },
+          "imports": [
+            "portable-net45+win8+wp8+wpa81",
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.400/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/eryaz.Web.Host.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/eryaz.Web.Host.csproj",
+        "projectName": "eryaz.Web.Host",
+        "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/eryaz.Web.Host.csproj",
+        "packagesPath": "/Users/selim/.nuget/packages/",
+        "outputPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Host/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/selim/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/eryaz.Web.Core.csproj": {
+                "projectPath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Web.Core/eryaz.Web.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Abp.Castle.Log4Net": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.4, )"
+            }
+          },
+          "imports": [
+            "portable-net45+win8+wp8+wpa81",
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.400/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
