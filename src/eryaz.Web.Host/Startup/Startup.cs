@@ -76,9 +76,10 @@ namespace eryaz.Web.Host.Startup
 
             // Swagger - Enable this line and the related lines in Configure method to enable swagger UI
             ConfigureSwagger(services);
-
+            
             // Configure Abp and Dependency Injection
             services.AddAbpWithoutCreatingServiceProvider<eryazWebHostModule>(
+                
                 // Configure Log4Net logging
                 options => options.IocManager.IocContainer.AddFacility<LoggingFacility>(
                     f => f.UseAbpLog4Net().WithConfig(_hostingEnvironment.IsDevelopment()
@@ -86,7 +87,7 @@ namespace eryaz.Web.Host.Startup
                         : "log4net.Production.config"
                     )
                 )
-            );
+            ) ;
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
