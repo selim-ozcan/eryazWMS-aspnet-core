@@ -14,4 +14,29 @@
   <ItemGroup>
     <ProjectReference Include="..\eryaz.Core\eryaz.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Müşteri\Dto\" />
+    <None Remove="Customers\" />
+    <None Remove="Customers\Dto\" />
+    <None Remove="Products\" />
+    <None Remove="Products\Dto\" />
+    <None Remove="Warehouses\" />
+    <None Remove="Warehouses\Dto\" />
+    <None Remove="Documents\" />
+    <None Remove="Documents\Dto\" />
+    <None Remove="Movements\" />
+    <None Remove="Movements\Dto\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Customers\" />
+    <Folder Include="Customers\Dto\" />
+    <Folder Include="Products\" />
+    <Folder Include="Products\Dto\" />
+    <Folder Include="Warehouses\" />
+    <Folder Include="Warehouses\Dto\" />
+    <Folder Include="Documents\" />
+    <Folder Include="Documents\Dto\" />
+    <Folder Include="Movements\" />
+    <Folder Include="Movements\Dto\" />
+  </ItemGroup>
 </Project>

@@ -19,4 +19,18 @@
     <PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="7.3.0" />
     <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="3.4.0" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Customers\" />
+    <None Remove="products\" />
+    <None Remove="Warehouses\" />
+    <None Remove="Documents\" />
+    <None Remove="Products\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Customers\" />
+    <Folder Include="products\" />
+    <Folder Include="Warehouses\" />
+    <Folder Include="Documents\" />
+    <Folder Include="Products\" />
+  </ItemGroup>
 </Project>

@@ -2,6 +2,8 @@
 <localizationDictionary culture="en">
   <texts>
     <text name="HomePage" value="Home page" />
+    <text name="Customers" value="Customers" />
+    <text name="Create New Customer" value="Yeni Müşteri Oluştur" />
     <text name="About" value="About" />
     <text name="WelcomeMessage" value="Welcome to eryaz!" />
     <text name="FormIsNotValidMessage" value="Form is not valid. Please check and fix errors." />
