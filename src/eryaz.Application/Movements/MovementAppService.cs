@@ -12,55 +12,100 @@ using Abp.UI;
 using eryaz.Movements.Dto;
 using eryaz.Movements;
 using eryaz.Documents;
+using eryaz.Movements;
+using Microsoft.EntityFrameworkCore;
+using Abp.Domain.Uow;
+using System.Linq.Expressions;
+using eryaz.Customers.Dto;
+using eryaz.Documents.Dto;
+using eryaz.Products.Dto;
+using eryaz.Warehouses.Dto;
 
 namespace eryaz.Movements
 {
     public class MovementAppService : ApplicationService
     {
-        private readonly IRepository<Movement> _movementRepository;
-        private readonly IRepository<Document> _documentRepository;
+        private readonly MovementManager _movementManager;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-        public MovementAppService(IRepository<Movement> movementRepository, IRepository<Document> documentRepository)
+        public MovementAppService(
+            MovementManager movementManager,
+            IUnitOfWorkManager unitOfWorkManager)
         {
-            _movementRepository = movementRepository;
-            _documentRepository = documentRepository;
+            _movementManager = movementManager;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
-        public async Task CreateMovement(CreateMovementDto input)
+        public async Task CreateMovementAsync(CreateMovementDto input)
         {
             var newMovement = ObjectMapper.Map<Movement>(input);
-            await _movementRepository.InsertAsync(newMovement);
-
-            // Stok var mı yok mu kontrol etme mantığı
+            await _movementManager.CreateMovementAsync(newMovement);
         }
 
-        public async Task<MovementDto> GetMovement(int Id)
+        public async Task<MovementDto> GetMovementAsync(int Id)
         {
-            var movement = await _movementRepository.FirstOrDefaultAsync(c => c.Id == Id);
-            if(movement == null)
-            {
-                throw new UserFriendlyException("Girilen transfer bulunamadı.");
-            }
+            var movement = await _movementManager.GetMovementWhereAsync(movement => movement.Id == Id);
             var newMovement = ObjectMapper.Map<MovementDto>(movement);
             return newMovement;
         }
 
-        public async Task<List<MovementDto>> GetAllMovements()
+        public async Task<List<MovementDto>> GetAllMovementsAsync()
         {
-            var Movements = await _movementRepository.GetAllListAsync();
-            return ObjectMapper.Map<List<MovementDto>>(Movements);
+            var movements = _movementManager.GetAllMovements();
+            return ObjectMapper.Map<List<MovementDto>>(await movements.ToListAsync());
 
         }
 
-        public PagedResultDto<MovementDto> GetAllMovementsPaged(PagedMovementResultRequestDto input)
+        public async Task<PagedResultDto<MovementDto>> GetAllMovementsPagedAsync(PagedMovementResultRequestDto input)
         {
-            var movements = _movementRepository.GetAllIncluding(m => m.Product, movements => movements.Warehouse)
-            .WhereIf(!input.Keyword.IsNullOrWhiteSpace(), x => x.Warehouse.WarehouseName.Contains(input.Keyword) || x.Product.ProductCode.Contains(input.Keyword));
-            var count = movements.Count();
+            int count;
+            async Task<List<Movement>> GetAllMovements(params Expression<Func<Movement, bool>>[] predicates)
+            {
+                var movements = _movementManager.GetAllMovements(predicates)
+                    .Include(movement => movement.Product)
+                    .Include(movement=> movement.Warehouse)
+                    .WhereIf(!string.IsNullOrEmpty(input.Keyword),
+                  movement =>
+                  movement.Product.ProductName.Contains(input.Keyword) ||
+                  movement.Product.ProductCode.Contains(input.Keyword) ||
+                  movement.Warehouse.WarehouseName.Contains(input.Keyword));
+
+                count = movements.Count();
+                movements = movements.Skip(input.SkipCount).Take(input.MaxResultCount);
+
+                return await movements.ToListAsync();
+            }
+
+            List<Movement> movementsToReturn;
+            if (input.IncludeDeleted == null)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    movementsToReturn = await GetAllMovements();
+                }
+            }
+            else if (input.IncludeDeleted == true)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    movementsToReturn = await GetAllMovements(movement => movement.IsDeleted == true);
+                }
+            }
+            else
+            {
+                movementsToReturn = await GetAllMovements();
+            }
+
+            var mappedMovementList = ObjectMapper.Map<List<MovementDto>>(movementsToReturn);
+            for (int i = 0; i < mappedMovementList.Count; i++)
+            {
+                mappedMovementList[i].ProductDto = ObjectMapper.Map<ProductDto>(movementsToReturn[i].Product);
+                mappedMovementList[i].WarehouseDto = ObjectMapper.Map<WarehouseDto>(movementsToReturn[i].Warehouse);
+            }
 
             return new PagedResultDto<MovementDto>
             {
-                Items = ObjectMapper.Map<List<MovementDto>>(movements.ToList()),
+                Items = mappedMovementList,
                 TotalCount = count,
             };
         }

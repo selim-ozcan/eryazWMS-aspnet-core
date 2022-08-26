@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using eryaz.Authorization.Users;
+using eryaz.Documents;
 
 namespace eryaz.Customers
 {
@@ -13,6 +15,8 @@ namespace eryaz.Customers
         public string TaxOffice { get; set; }
         public string Telephone { get; set; }
         public string Email { get; set; }
+
+        ICollection<DocumentHeader> Documents { get; set; }
 
         public bool IsDeleted { get; set; }
     }

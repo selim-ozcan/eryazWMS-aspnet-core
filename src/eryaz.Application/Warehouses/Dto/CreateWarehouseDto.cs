@@ -5,7 +5,7 @@ using Abp.AutoMapper;
 namespace eryaz.Warehouses.Dto
 {
     [AutoMap(typeof(Warehouse))]
-    public class CreateWarehouseDto : EntityDto<int>
+    public class CreateWarehouseDto
     {
         public string WarehouseCode { get; set; }
         public string WarehouseName { get; set; }

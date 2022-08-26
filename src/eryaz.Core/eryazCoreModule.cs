@@ -40,6 +40,7 @@ namespace eryaz
             
             Configuration.Settings.SettingEncryptionConfiguration.DefaultPassPhrase = eryazConsts.DefaultPassPhrase;
             SimpleStringCipher.DefaultPassPhrase = eryazConsts.DefaultPassPhrase;
+
         }
 
         public override void Initialize()

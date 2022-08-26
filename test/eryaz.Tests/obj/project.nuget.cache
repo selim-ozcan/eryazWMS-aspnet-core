@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "oIpN6358LSrX2ccJQhHEcMjOvBji4U7tixGBq3D2G9iIcrrS8oWio82aDn3/Bf/BX0rHW3UkkaNFXHerdwmmGw==",
+  "dgSpecHash": "058IlxMREBfC6u1gJZgmfRqszpnc6uRap9SfZC62C06Zr19TAdxVjuIS86LliE62rNb9Mk8MbiuFbFbq/x5uDQ==",
   "success": true,
   "projectFilePath": "/Users/selim/repo/eryaz/aspnet-core/test/eryaz.Tests/eryaz.Tests.csproj",
   "expectedPackageFiles": [
@@ -27,9 +27,9 @@
     "/Users/selim/.nuget/packages/microsoft.data.sqlclient/2.1.4/microsoft.data.sqlclient.2.1.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.data.sqlclient.sni.runtime/2.1.1/microsoft.data.sqlclient.sni.runtime.2.1.1.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.dotnet.platformabstractions/1.1.2/microsoft.dotnet.platformabstractions.1.1.2.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.4/microsoft.entityframeworkcore.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.4/microsoft.entityframeworkcore.abstractions.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.4/microsoft.entityframeworkcore.analyzers.6.0.4.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.8/microsoft.entityframeworkcore.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.8/microsoft.entityframeworkcore.abstractions.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.8/microsoft.entityframeworkcore.analyzers.6.0.8.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.inmemory/6.0.4/microsoft.entityframeworkcore.inmemory.6.0.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.relational/6.0.4/microsoft.entityframeworkcore.relational.6.0.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.sqlserver/6.0.4/microsoft.entityframeworkcore.sqlserver.6.0.4.nupkg.sha512",

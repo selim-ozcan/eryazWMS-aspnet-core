@@ -9,105 +9,101 @@ using Abp.Domain.Repositories;
 using Abp.Extensions;
 using Abp.Linq.Extensions;
 using Abp.UI;
-using eryaz.Authorization.Users;
-using eryaz.Customers.Dto;
-using eryaz.Movements;
-using eryaz.Products;
 using eryaz.Products.Dto;
+using eryaz.Products;
+using eryaz.Documents;
+using eryaz.Movements;
+using Microsoft.EntityFrameworkCore;
+using Abp.Domain.Uow;
+using System.Linq.Expressions;
 
 namespace eryaz.Products
 {
     public class ProductAppService : ApplicationService
     {
-        private readonly IRepository<Product> _productRepository;
-        private readonly IRepository<Movement> _movementRepository;
+        private readonly ProductManager _productManager;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-        public ProductAppService(IRepository<Product> productRepository, IRepository<Movement> movementRepository)
+        public ProductAppService(
+            ProductManager productManager,
+            IUnitOfWorkManager unitOfWorkManager)
         {
-            _productRepository = productRepository;
-            _movementRepository = movementRepository;
+            _productManager = productManager;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
-        public async Task CreateProduct(CreateProductDto input)
+        public async Task CreateProductAsync(CreateProductDto input)
         {
-            var product = await _productRepository.FirstOrDefaultAsync(p => p.ProductCode == input.ProductCode);
-            if (product != null)
+            var newProduct = ObjectMapper.Map<Product>(input);
+            await _productManager.CreateProductAsync(newProduct);
+        }
+
+        public async Task<ProductDto> GetProductAsync(int Id)
+        {
+            var product = await _productManager.GetProductWhereAsync(product => product.Id == Id);
+            var newProduct = ObjectMapper.Map<ProductDto>(product);
+            return newProduct;
+        }
+
+        public async Task<List<ProductDto>> GetAllProductsAsync()
+        {
+            var products = _productManager.GetAllProducts();
+            return ObjectMapper.Map<List<ProductDto>>(await products.ToListAsync());
+
+        }
+
+        public async Task<PagedResultDto<ProductDto>> GetAllProductsPagedAsync(PagedProductResultRequestDto input)
+        {
+            int count;
+            async Task<List<Product>> GetAllProducts(params Expression<Func<Product, bool>>[] predicates)
             {
-                throw new UserFriendlyException("Girilen stok koduna sahip bir ürün mevcut.");   
+                var products = _productManager.GetAllProducts(predicates).WhereIf(!string.IsNullOrEmpty(input.Keyword),
+                  product =>
+                  product.ProductName.Contains(input.Keyword) ||
+                  product.ProductCode.Contains(input.Keyword) ||
+                  product.Brand.Contains(input.Keyword));
+
+                count = products.Count();
+                products = products.Skip(input.SkipCount).Take(input.MaxResultCount);
+
+                return await products.ToListAsync();
             }
 
-            var newProduct = ObjectMapper.Map<Product>(input);
-            await _productRepository.InsertAsync(newProduct);
-        }
-
-        public async Task<ProductDto> GetProduct(int id)
-        {
-            var product = await _productRepository.FirstOrDefaultAsync(p => p.Id == id);
-            return ObjectMapper.Map<ProductDto>(product);
-        }
-
-        public async Task<List<ProductDto>> GetAllProducts()
-        {
-            var products = await _productRepository.GetAllListAsync();
-            return ObjectMapper.Map<List<ProductDto>>(products);
-
-        }
-
-        public PagedResultDto<ProductDto> GetAllProductsPaged(PagedProductResultRequestDto input)
-        {
-            var products = _productRepository.GetAll()
-            .WhereIf(!input.Keyword.IsNullOrWhiteSpace(), x => x.Brand.Contains(input.Keyword));
-            var count = products.Count();
+            List<Product> productsToReturn;
+            if (input.IncludeDeleted == null)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    productsToReturn = await GetAllProducts();
+                }
+            }
+            else if (input.IncludeDeleted == true)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    productsToReturn = await GetAllProducts(product => product.IsDeleted == true);
+                }
+            }
+            else
+            {
+                productsToReturn = await GetAllProducts();
+            }
 
             return new PagedResultDto<ProductDto>
             {
-                Items = ObjectMapper.Map<List<ProductDto>>(products.ToList()),
+                Items = ObjectMapper.Map<List<ProductDto>>(productsToReturn),
                 TotalCount = count,
             };
         }
 
         public async Task UpdateProduct(ProductDto input)
         {
-            var product = await _productRepository.FirstOrDefaultAsync(p => p.ProductCode == input.ProductCode);
-            var productOld = await _productRepository.FirstOrDefaultAsync(p => p.Id == input.Id);
-            if (product != null && productOld.Id != product.Id)
-            {
-                throw new UserFriendlyException("Girilen stok koduna sahip bir ürün mevcut.");
-            }
-
-            ObjectMapper.Map(input, productOld);
-
-            await _productRepository.UpdateAsync(productOld);
+            await _productManager.UpdateProductAsync(ObjectMapper.Map<Product>(input));
         }
 
         public async Task DeleteProduct(int id)
         {
-            var movements = _movementRepository.GetAllIncluding(m => m.Product, m => m.Warehouse).Where(d => d.Product.Id == id).ToList();
-            var documentFlag = false;
-            var movementFlag = false;
-            if (movements.Count > 0)
-            {
-                foreach(Movement movement in movements)
-                {
-                    if (movement.DocumentId != null)
-                    {
-                        documentFlag = true;
-                    }
-                }
-                if(documentFlag)
-                {
-                    
-                    foreach(Movement movement in movements)
-                    {
-                        if (movement != null && movement.Warehouse.WarehouseType != Warehouses.WarehouseType.Entrance) movementFlag = true;
-                    }
-                    if (movementFlag) throw new UserFriendlyException("Stok kartı bir hareket görmüştür silinemez!");
-                    else throw new UserFriendlyException("Stok kartı bir evrak ile ilişkilidir silinemez!");
-                }
-                
-            }
-
-            await _productRepository.DeleteAsync(id);
+            await _productManager.DeleteProductAsync(id);
         }
     }
 }

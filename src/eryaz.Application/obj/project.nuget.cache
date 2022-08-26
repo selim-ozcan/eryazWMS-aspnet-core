@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5AH578NitcHoQv2/OnwXZg8CHXkDhNLG/KUwl7DtmTTX+OtQLr3w0ki4/gGKwyIiTcddizEUdEh/a5iIe22f/g==",
+  "dgSpecHash": "t67HZ/UXg91d+BT4A+yGt51vWNvHHkG1Genj/BY7EEqABa99ZGKdFd6s8T2uAoz6K2056eE/Her0Bl7E76pBug==",
   "success": true,
   "projectFilePath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.Application/eryaz.Application.csproj",
   "expectedPackageFiles": [
@@ -21,9 +21,9 @@
     "/Users/selim/.nuget/packages/jetbrains.annotations/2022.1.0/jetbrains.annotations.2022.1.0.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.dotnet.platformabstractions/1.1.2/microsoft.dotnet.platformabstractions.1.1.2.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.4/microsoft.entityframeworkcore.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.4/microsoft.entityframeworkcore.abstractions.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.4/microsoft.entityframeworkcore.analyzers.6.0.4.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.8/microsoft.entityframeworkcore.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.8/microsoft.entityframeworkcore.abstractions.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.8/microsoft.entityframeworkcore.analyzers.6.0.8.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.relational/6.0.4/microsoft.entityframeworkcore.relational.6.0.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.extensions.caching.abstractions/6.0.0/microsoft.extensions.caching.abstractions.6.0.0.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.extensions.caching.memory/6.0.1/microsoft.extensions.caching.memory.6.0.1.nupkg.sha512",

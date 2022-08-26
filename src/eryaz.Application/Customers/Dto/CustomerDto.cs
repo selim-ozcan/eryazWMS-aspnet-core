@@ -4,8 +4,7 @@ using Abp.AutoMapper;
 
 namespace eryaz.Customers.Dto
 {
-    [AutoMapTo(typeof(Customer))]
-    [AutoMapFrom(typeof(Customer))]
+    [AutoMap(typeof(Customer))]
     public class CustomerDto : EntityDto<int>
     {
         public string CustomerCode { get; set; }

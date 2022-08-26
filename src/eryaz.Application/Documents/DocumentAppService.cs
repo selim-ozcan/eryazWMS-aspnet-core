@@ -1,326 +1,296 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.UI;
 using eryaz.Customers;
 using eryaz.Documents.Dto;
 using eryaz.Movements;
-using eryaz.Products;
-using eryaz.Products.Dto;
 using eryaz.Warehouses;
+using Microsoft.EntityFrameworkCore;
+using eryaz.Products;
+using eryaz.Customers.Dto;
+using System.Reflection.PortableExecutable;
+using eryaz.Products.Dto;
 
 namespace eryaz.Documents
 {
     public class DocumentAppService : ApplicationService
     {
-        private readonly IRepository<Document> _documentRepository;
-        private readonly IRepository<Customer> _customerRepository;
-        private readonly IRepository<Warehouse> _warehouseRepository;
-        private readonly IRepository<Movement> _movementRepository;
-        private readonly IRepository<Product> _productRepository;
-        private readonly IRepository<DocumentMovementStatus> _documentMovementStatusRepository;
+        private readonly DocumentHeaderManager _documentHeaderManager;
+        private readonly DocumentDetailManager _documentDetailManager;
+        private readonly ProductManager _productManager;
+        private readonly CustomerManager _customerManager;
+        private readonly MovementManager _movementManager;
+        private readonly WarehouseManager _warehouseManager;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
         public DocumentAppService(
-            IRepository<Document> documentRepository,
-            IRepository<Customer> customerRepository,
-            IRepository<Warehouse> warehouseRepository,
-            IRepository<Movement> movementRepository,
-            IRepository<Product> productRepository,
-            IRepository<DocumentMovementStatus> documentMovementStatusRepository)
+            DocumentHeaderManager documentHeaderManager,
+            DocumentDetailManager documentDetailManager,
+            ProductManager productManager,
+            CustomerManager customerManager,
+            MovementManager movementManager,
+            WarehouseManager warehouseManager,
+            IUnitOfWorkManager unitOfWorkManager)
         {
-            _documentRepository = documentRepository;
-            _customerRepository = customerRepository;
-            _warehouseRepository = warehouseRepository;
-            _movementRepository = movementRepository;
-            _productRepository = productRepository;
-            _documentMovementStatusRepository = documentMovementStatusRepository;
-           
+            _documentHeaderManager = documentHeaderManager;
+            _documentDetailManager = documentDetailManager;
+            _productManager = productManager;
+            _customerManager = customerManager;
+            _movementManager = movementManager;
+            _warehouseManager = warehouseManager;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
-        public async Task CreateDocument(CreateDocumentDto input)
+        public async Task CreateDocumentAsync(CreateDocumentDto input)
         {
-            var document = await _documentRepository.FirstOrDefaultAsync(p => p.DocumentNumber == input.DocumentNumber);
-            if (document != null)
+            // Check if document already exists.
+            var inputDocumentNumber = input.documentHeader.DocumentNumber;
+            var documentHeader = _documentHeaderManager.GetAllDocumentHeaders(d => d.DocumentNumber == inputDocumentNumber).AsNoTracking().FirstOrDefault();
+            if(documentHeader != null) throw new UserFriendlyException("A document with the given document number already exists!");
+
+            // Check if customer exists.
+            var customerId = input.documentHeader.CustomerId;
+            var customer = await _customerManager.GetCustomerByIdAsync(customerId);
+            if (customer == null) throw new UserFriendlyException("Customer does not exists!");
+
+            // Check if product exist.
+            var documentDetails = input.documentDetails;
+            foreach (var detail in documentDetails)
             {
-                throw new UserFriendlyException("Girilen evrak numarasına sahip bir evrak mevcut.");
+                var product = await _productManager.GetProductByIdAsync(detail.ProductId);
+                if(product == null) throw new UserFriendlyException("Product with ID" + detail.ProductId + "does not exists!");
             }
 
-            var customer = _customerRepository.Get(input.CustomerId);
+            // Map Dto's to Entities.
+            var documentHeaderMapped = ObjectMapper.Map<DocumentHeader>(input.documentHeader);
+            var documentDetailsMapped = ObjectMapper.Map<List<DocumentDetail>>(input.documentDetails);
 
-            if (customer == null)
+            // Create document header.
+            await _documentHeaderManager.CreateDocumentHeaderAsync(documentHeaderMapped);
+            await _unitOfWorkManager.Current.SaveChangesAsync();
+
+            // Create document details.
+            foreach(var documentDetail in documentDetailsMapped)
             {
-                throw new UserFriendlyException("Girilen müşteri bulunamadı.");
+                documentDetail.DocumentHeaderId = documentHeaderMapped.Id; 
+                await _documentDetailManager.CreateDocumentDetailAsync(documentDetail);
             }
 
-            List<Movement> movements = new List<Movement>();
-            int stockCounter = 0;
-            foreach(var productId in input.ProductIds)
-            {
-                var product = await _productRepository.GetAsync(productId);
-                var warehouse = _warehouseRepository.FirstOrDefault(w => w.WarehouseType == WarehouseType.Entrance);
-                var movement = new Movement() { MovementDate = DateTime.Now, Product = product, MovementType = MovementType.Entry, Warehouse = warehouse, IsDeleted = false };
-                movement.Stock = input.Stocks[stockCounter++];
-                var movementEntity = await _movementRepository.InsertAsync(movement);
+            // Create movements of the document.
+            await CreateDocumentMovementsAsync(documentDetailsMapped);
+        }
 
-                movements.Add(movementEntity);
-                _documentMovementStatusRepository.Insert(new DocumentMovementStatus
+        public async Task<DocumentHeaderDto> GetDocumentHeaderAsync(int id)
+        {
+            var documentHeader = await _documentHeaderManager.GetAllDocumentHeaders(header => header.Id == id).Include(header => header.Customer).Include(header => header.DocumentDetails).FirstOrDefaultAsync();
+
+            var customerMapped = ObjectMapper.Map<CustomerDto>(documentHeader.Customer);
+            var documentHeaderMapped = ObjectMapper.Map<DocumentHeaderDto>(documentHeader);
+            documentHeaderMapped.CustomerDto = customerMapped;
+
+
+            return documentHeaderMapped;
+        }
+
+        public async Task<List<DocumentHeaderDto>> GetAllDocumentHeadersAsync()
+        {
+            var documentHeaders = _documentHeaderManager.GetAllDocumentHeaders();
+            return ObjectMapper.Map<List<DocumentHeaderDto>>(await documentHeaders.ToListAsync());
+
+        }
+
+        public async Task<PagedResultDto<DocumentHeaderDto>> GetAllDocumentHeadersPagedAsync(PagedDocumentResultRequestDto input)
+        {
+            int count;
+            async Task<List<DocumentHeader>> GetAllDocumentHeaders(params Expression<Func<DocumentHeader, bool>>[] predicates)
+            {
+                var documentHeaders = _documentHeaderManager.GetAllDocumentHeaders(predicates).Include(documentHeader => documentHeader.Customer).WhereIf(!string.IsNullOrEmpty(input.Keyword),
+                  documentHeader =>
+                  documentHeader.Customer.CustomerCode.Contains(input.Keyword) ||
+                  documentHeader.DocumentNumber.Contains(input.Keyword) ||
+                  documentHeader.Customer.Title.Contains(input.Keyword));
+
+                count = documentHeaders.Count();
+                documentHeaders = documentHeaders.Skip(input.SkipCount).Take(input.MaxResultCount);
+
+                return documentHeaders.ToList();
+            }
+
+            List<DocumentHeader> documentHeadersToReturn;
+            if (input.IncludeDeleted == null)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
                 {
-                    Movement = movementEntity,
-                    IsCompleted = false
-                });
+                    documentHeadersToReturn = await GetAllDocumentHeaders();
+                }
+            }
+            else if (input.IncludeDeleted == true)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    documentHeadersToReturn = await GetAllDocumentHeaders(documentHeader => documentHeader.IsDeleted == true);
+                }
+            }
+            else
+            {
+                documentHeadersToReturn = await GetAllDocumentHeaders();
             }
 
-            var documentToInsert = ObjectMapper.Map<Document>(input);
-            documentToInsert.Customer = customer;
-            documentToInsert.Movements = movements;
-            var addedDocument = await _documentRepository.InsertAsync(documentToInsert);
-
-
-        }
-
-        public async Task<DocumentDto> GetDocument(int id)
-        {
-            var document = _documentRepository.GetAllIncluding(d => d.Customer, m => m.Movements).FirstOrDefault(d => d.Id == id);
-
-            var movements = _movementRepository.GetAllIncluding(m => m.Product, m => m.Warehouse).Where(m => m.DocumentId == id).ToList();
-            document.Movements = movements;
-
-            var movementStatuses = _documentMovementStatusRepository.GetAllList(ms => movements.Contains(ms.Movement));
-            
-            var mappedDocument = ObjectMapper.Map<DocumentDto>(document);
-            mappedDocument.Movements = document.Movements;
-            mappedDocument.MovementStatuses = movementStatuses;
-            return mappedDocument;
-        }
-
-        public List<DocumentDto> GetAllDocuments()
-        {
-            var documents = _documentRepository.GetAllIncluding(d => d.Customer, m => m.Movements).ToList();
-
-            return ObjectMapper.Map<List<DocumentDto>>(documents);
-
-        }
-
-        public async Task DeleteDocument(int id)
-        {
-            await _documentRepository.DeleteAsync(id);
-        }
-
-        public PagedResultDto<DocumentDto> GetAllDocumentsPaged(PagedDocumentResultRequestDto input)
-        {
-            var repo = _documentRepository.GetAllIncluding(d => d.Customer)
-            .WhereIf(!input.Keyword.IsNullOrWhiteSpace(), x => x.DocumentNumber.Contains(input.Keyword));
-            var count = repo.Count();
-
-            var documents = repo.ToList();
-            List<DocumentDto> documentsDto = new(count);
-            var list = ObjectMapper.Map<List<DocumentDto>>(repo);
-
-            return new PagedResultDto<DocumentDto>
+            var mappedHeaderList = ObjectMapper.Map<List<DocumentHeaderDto>>(documentHeadersToReturn);
+            for (int i = 0; i < mappedHeaderList.Count; i++)
             {
-                Items = list,
+                mappedHeaderList[i].CustomerDto = ObjectMapper.Map<CustomerDto>(documentHeadersToReturn[i].Customer);
+            }
+
+            return new PagedResultDto<DocumentHeaderDto>
+            {
+                Items = mappedHeaderList,
                 TotalCount = count,
             };
         }
 
-        public async Task<DocumentDto> UpdateDocument(DocumentDto input)
+        private async Task CreateDocumentMovementsAsync(List<DocumentDetail> documentDetails)
         {
+            var entryWarehouse = await _warehouseManager.GetWarehouseWhereAsync(warehouse => warehouse.WarehouseType == WarehouseType.Entrance);
 
-            var document = await _documentRepository.FirstOrDefaultAsync(d => d.DocumentNumber == input.DocumentNumber);
-            if (document != null)
+            foreach (var detail in documentDetails)
             {
-                throw new UserFriendlyException("Girilen evrak koduna sahip bir evrak mevcut.");
+                var movementToAdd = new Movement()
+                {
+                    MovementDate = DateTime.Now,
+                    MovementType = MovementType.Entry,
+                    Product = detail.Product,
+                    ProductId = detail.ProductId,
+                    Stock = detail.Stock,
+                    Warehouse = entryWarehouse,
+                    WarehouseId = entryWarehouse.Id
+                };
+
+                await _movementManager.CreateMovementAsync(movementToAdd);
             }
-
-            var documentToReturn = ObjectMapper.Map<Document>(input);
-
-            var updatedDocument = ObjectMapper.Map<DocumentDto>(await _documentRepository.UpdateAsync(documentToReturn));
-
-            return updatedDocument;
         }
 
-        public List<DocumentDto> GetDocumentListByCustomer(int customerId)
+        public async Task<List<DocumentDetailDto>> GetDetailsOfDocumentAsync(int documentHeaderId)
         {
-            return ObjectMapper.Map<List<DocumentDto>>(_documentRepository.GetAll().Where(p => p.Customer.Id == customerId).ToList());
+            var documentDetails = await _documentDetailManager.GetAllDocumentDetails(detail => detail.DocumentHeaderId == documentHeaderId).Include(detail => detail.Product).ToListAsync();
+
+            var documentDetailsMapped = ObjectMapper.Map<List<DocumentDetailDto>>(documentDetails);
+            for (int i = 0; i < documentDetails.Count; i++)
+            {
+                documentDetailsMapped[i].ProductDto = ObjectMapper.Map<ProductDto>(documentDetails[i].Product);
+            }
+            
+            return documentDetailsMapped;
         }
 
-        public async Task DeleteMovementFromDocument(int documentId, int movementId)
+        public async Task CompleteDetailOfDocument(int documentHeaderId, int detailId)
         {
-            var document = await _documentRepository.FirstOrDefaultAsync(d => d.Id == documentId);
-            if(document == null)
-            {
-                throw new UserFriendlyException("Verilen doküman mevcut değil");
-            }
-            var movement = _movementRepository.GetAllIncluding(m => m.Product).FirstOrDefault(m => m.Id == movementId);
-            if (movement == null)
-            {
-                throw new UserFriendlyException("Girilen transfer koduna sahip bir transfer mevcut değil.");
-            }
-            var movementStatus = await _documentMovementStatusRepository.FirstOrDefaultAsync(ms => ms.Movement.Id == movementId);
-            if(movementStatus.IsCompleted)
-            {
-                throw new UserFriendlyException("Transfer çoktan gerçekleşti :(");
-            }
+            var documentHeader = await _documentHeaderManager.GetAllDocumentHeaders(header => header.Id == documentHeaderId).AsNoTracking().FirstOrDefaultAsync();
+            if (documentHeader == null) throw new UserFriendlyException("A document with the given id does not exist!");
 
-            await _documentMovementStatusRepository.DeleteAsync(movementStatus);
+            var documentDetail = await _documentDetailManager.GetAllDocumentDetails(detail => detail.Id == detailId).Include(detail => detail.Product).FirstOrDefaultAsync();
+            if (documentDetail == null) throw new UserFriendlyException("A document detail with given id does not exist!");
 
-            var entranceWarehouse = await _warehouseRepository.FirstOrDefaultAsync(w => w.WarehouseType == WarehouseType.Entrance);
-            var product = await _productRepository.FirstOrDefaultAsync(movement.Product.Id);
-            var exitMovement = new Movement()
-            {
-                MovementDate = DateTime.Now,
-                Product = product,
-                MovementType = MovementType.Exit,
-                Warehouse = entranceWarehouse,
-                Stock = movement.Stock
-            };
-
-            movement.DocumentId = null;
-            await _movementRepository.UpdateAsync(movement);
-            await _movementRepository.InsertAsync(exitMovement);
-        }
-
-        public async Task UpdateMovementOfDocument(int documentId, int movementId, int stock)
-        {
-            var document = await _documentRepository.FirstOrDefaultAsync(d => d.Id == documentId);
-            if (document == null)
-            {
-                throw new UserFriendlyException("Verilen doküman mevcut değil");
-            }
-            var movement = _movementRepository.GetAllIncluding(m => m.Product, m => m.Warehouse).FirstOrDefault(m => m.Id == movementId);
-            if (movement == null)
-            {
-                throw new UserFriendlyException("Girilen transfer koduna sahip bir transfer mevcut değil.");
-            }
-            if (stock <= 0)
-            {
-                throw new UserFriendlyException("Stok değeri 0'dan küçük olamaz");
-            }
-
-            var movementToAdd = new Movement()
-            {
-                MovementDate = DateTime.Now,
-                Product = movement.Product,
-                MovementType = MovementType.Entry,
-                Warehouse = movement.Warehouse,
-                Stock = stock,
-                DocumentId = movement.DocumentId
-            };
-
-            await _movementRepository.InsertAsync(movementToAdd);
-
-        }
-
-        public async Task CompleteMovementOfDocument(int documentId, int movementId)
-        {
-            var document = await _documentRepository.FirstOrDefaultAsync(d => d.Id == documentId);
-            if (document == null)
-            {
-                throw new UserFriendlyException("Verilen doküman mevcut değil");
-            }
-            var movement = _movementRepository.GetAllIncluding(m => m.Product).FirstOrDefault(m => m.Id == movementId);
-            if (movement == null)
-            {
-                throw new UserFriendlyException("Girilen transfer koduna sahip bir transfer mevcut değil.");
-            }
-            var movementStatus = await _documentMovementStatusRepository.FirstOrDefaultAsync(ms => ms.Movement.Id == movementId);
-            if (movementStatus.IsCompleted)
-            {
-                throw new UserFriendlyException("Transfer zaten gerçekleşti.");
-            }
-
-            var product = await _productRepository.FirstOrDefaultAsync(movement.Product.Id);
-
-            var mainWarehouse = await _warehouseRepository.FirstOrDefaultAsync(w => w.WarehouseType == WarehouseType.Main);
-            var entranceWarehouse = await _warehouseRepository.FirstOrDefaultAsync(w => w.WarehouseType == WarehouseType.Entrance);
+            var entryWarehouse = await _warehouseManager.GetAllWarehouses(warehouse => warehouse.WarehouseType == WarehouseType.Entrance).FirstOrDefaultAsync();
+            var mainWarehouse = await _warehouseManager.GetAllWarehouses(warehouse => warehouse.WarehouseType == WarehouseType.Main).FirstOrDefaultAsync();
 
             var exitMovement = new Movement()
             {
                 MovementDate = DateTime.Now,
-                Product = product,
                 MovementType = MovementType.Exit,
-                Warehouse = entranceWarehouse,
-                Stock = movement.Stock
+                Product = documentDetail.Product,
+                ProductId = documentDetail.Product.Id,
+                Stock = documentDetail.Stock,
+                Warehouse = entryWarehouse,
+                WarehouseId = entryWarehouse.Id
             };
 
             var entryMovement = new Movement()
             {
                 MovementDate = DateTime.Now,
-                Product = product,
                 MovementType = MovementType.Entry,
+                Product = documentDetail.Product,
+                ProductId = documentDetail.Product.Id,
+                Stock = documentDetail.Stock,
                 Warehouse = mainWarehouse,
-                Stock = movement.Stock
+                WarehouseId = mainWarehouse.Id
             };
 
-            await _movementRepository.InsertAsync(exitMovement);
-            await _movementRepository.InsertAsync(entryMovement);
-
-            movementStatus.IsCompleted = true;
-            await _documentMovementStatusRepository.UpdateAsync(movementStatus);
-
-            // check the movements that are result of update operations.
-            var updateResultMovements = _movementRepository.GetAllIncluding(m => m.Product)
-                .Where(m => m.DocumentId == documentId && m.Product.Id == product.Id && m.Id != movementId).ToList();
-            foreach (Movement mov in updateResultMovements)
-            {
-                var otherExitMovement = new Movement()
-                {
-                    MovementDate = DateTime.Now,
-                    Product = product,
-                    MovementType = MovementType.Exit,
-                    Warehouse = entranceWarehouse,
-                    Stock = mov.Stock
-                };
-
-                var otherEntryMovement = new Movement()
-                {
-                    MovementDate = DateTime.Now,
-                    Product = product,
-                    MovementType = MovementType.Entry,
-                    Warehouse = mainWarehouse,
-                    Stock = mov.Stock
-                };
-            }
-
-            var movementStatuses = _documentMovementStatusRepository.GetAllIncluding(ms => ms.Movement)
-                .Where(ms => ms.Movement.DocumentId == documentId && ms.Movement.Product.Id == product.Id && ms.Id != movementStatus.Id).ToList();
-
-            foreach(var movStatus in movementStatuses)
-            {
-                movStatus.IsCompleted = true;
-                await _documentMovementStatusRepository.UpdateAsync(movStatus);
-            }
+            documentDetail.IsCompleted = true;
+            await _movementManager.CreateMovementAsync(exitMovement);
+            await _movementManager.CreateMovementAsync(entryMovement);
         }
 
-        public async Task FinishDocument(int documentId)
+        public async Task DeleteDetailFromDocument(int documentHeaderId, int detailId)
         {
-            var document = _documentRepository.FirstOrDefault(d => d.Id == documentId);
-            if (document == null)
+            var documentHeader = await _documentHeaderManager.GetAllDocumentHeaders(header => header.Id == documentHeaderId).AsNoTracking().FirstOrDefaultAsync();
+            if (documentHeader == null) throw new UserFriendlyException("A document with the given id does not exist!");
+
+            var documentDetail = await _documentDetailManager.GetAllDocumentDetails(detail => detail.Id == detailId).Include(detail => detail.Product).FirstOrDefaultAsync();
+            if (documentDetail == null) throw new UserFriendlyException("A document detail with given id does not exist!");
+            if (documentDetail.IsCompleted == true) throw new UserFriendlyException("A completed detail cannot be deleted!");
+
+            var entryWarehouse = await _warehouseManager.GetAllWarehouses(warehouse => warehouse.WarehouseType == WarehouseType.Entrance).FirstOrDefaultAsync();
+            var exitMovement = new Movement()
             {
-                throw new UserFriendlyException("Verilen doküman mevcut değil");
-            }
-            if (document.Status.Equals("TAMAMLANDI"))
+                MovementDate = DateTime.Now,
+                MovementType = MovementType.Exit,
+                Product = documentDetail.Product,
+                ProductId = documentDetail.Product.Id,
+                Stock = documentDetail.Stock,
+                Warehouse = entryWarehouse,
+                WarehouseId = entryWarehouse.Id
+            };
+
+            await _movementManager.CreateMovementAsync(exitMovement);
+            await _documentDetailManager.DeleteDocumentDetailAsync(documentDetail.Id);
+        }
+
+        public async Task UpdateDetailOfDocument(int documentHeaderId, int detailId, int stock)
+        {
+            var documentHeader = await _documentHeaderManager.GetAllDocumentHeaders(header => header.Id == documentHeaderId).AsNoTracking().FirstOrDefaultAsync();
+            if (documentHeader == null) throw new UserFriendlyException("A document with the given id does not exist!");
+
+            var documentDetail = await _documentDetailManager.GetAllDocumentDetails(detail => detail.Id == detailId).Include(detail => detail.Product).FirstOrDefaultAsync();
+            if (documentDetail == null) throw new UserFriendlyException("A document detail with given id does not exist!");
+            if (stock <= 0) throw new UserFriendlyException("Stok değeri 0'dan küçük olamaz");
+
+            var entryWarehouse = await _warehouseManager.GetAllWarehouses(warehouse => warehouse.WarehouseType == WarehouseType.Entrance).FirstOrDefaultAsync();
+
+            var movementToAdd = new Movement()
             {
-                throw new UserFriendlyException("Verilen doküman zaten tamamlanmış.");
+                MovementDate = DateTime.Now,
+                MovementType = MovementType.Entry,
+                Product = documentDetail.Product,
+                ProductId = documentDetail.Product.Id,
+                Stock = stock,
+                Warehouse = entryWarehouse,
+                WarehouseId = entryWarehouse.Id
+            };
+
+            documentDetail.Stock += stock;
+            await _movementManager.CreateMovementAsync(movementToAdd);
+        }
+
+        public async Task FinishDocument(int documentHeaderId)
+        {
+            var documentHeader = await _documentHeaderManager.GetDocumentHeaderByIdAsync(documentHeaderId);
+            var documentDetails = await _documentDetailManager.GetAllDocumentDetails(detail => detail.DocumentHeaderId == documentHeaderId).ToListAsync();
+            foreach (var detail in documentDetails)
+            {
+                if (detail.IsCompleted == false) throw new UserFriendlyException("A document that has uncompleted details cannot be finished!");
             }
 
-            var movementStatuses = _documentMovementStatusRepository.GetAllIncluding(ms => ms.Movement).Where(ms => ms.Movement.DocumentId == documentId).ToList();
-            if (movementStatuses.Count <= 0) throw new UserFriendlyException("Verilen dokümanda hiç kalem yok!");
-            for (int i = 0; i < movementStatuses.Count; i++)
-            {
-                if (movementStatuses[i].IsCompleted == false){
-                    throw new UserFriendlyException("Verilen dokümanda tamamlanmayan kalemler var!");
-                }
-            }
-
-            document.Status = "TAMAMLANDI";
-            await _documentRepository.UpdateAsync(document);
+            documentHeader.IsCompleted = true;
         }
     }
 }

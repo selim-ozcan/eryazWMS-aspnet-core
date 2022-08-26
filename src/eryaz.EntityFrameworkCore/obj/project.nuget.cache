@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "AAwBjP2Gic1pWoNEPdcxEvnQUSed7+8t74BPQKXyI2CKP2HN/jezIHjEpabbexarG5tkTHA7YYbBXG2nrGCLrA==",
+  "dgSpecHash": "09GJ5gV/Ou3nMEnjxWMToL930cPdwdyftDTudLFROvQ3jUo6bvJDapc9lxbTop5Av9IHIKiDkKiNKxmk/4dfpQ==",
   "success": true,
   "projectFilePath": "/Users/selim/repo/eryaz/aspnet-core/src/eryaz.EntityFrameworkCore/eryaz.EntityFrameworkCore.csproj",
   "expectedPackageFiles": [
@@ -24,9 +24,9 @@
     "/Users/selim/.nuget/packages/microsoft.data.sqlclient/2.1.4/microsoft.data.sqlclient.2.1.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.data.sqlclient.sni.runtime/2.1.1/microsoft.data.sqlclient.sni.runtime.2.1.1.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.dotnet.platformabstractions/1.1.2/microsoft.dotnet.platformabstractions.1.1.2.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.4/microsoft.entityframeworkcore.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.4/microsoft.entityframeworkcore.abstractions.6.0.4.nupkg.sha512",
-    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.4/microsoft.entityframeworkcore.analyzers.6.0.4.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore/6.0.8/microsoft.entityframeworkcore.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.abstractions/6.0.8/microsoft.entityframeworkcore.abstractions.6.0.8.nupkg.sha512",
+    "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.analyzers/6.0.8/microsoft.entityframeworkcore.analyzers.6.0.8.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.design/6.0.4/microsoft.entityframeworkcore.design.6.0.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.relational/6.0.4/microsoft.entityframeworkcore.relational.6.0.4.nupkg.sha512",
     "/Users/selim/.nuget/packages/microsoft.entityframeworkcore.sqlserver/6.0.4/microsoft.entityframeworkcore.sqlserver.6.0.4.nupkg.sha512",

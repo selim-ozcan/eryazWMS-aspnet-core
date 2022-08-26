@@ -18,8 +18,7 @@
     "eryaz.Web.Host": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:44311/",
-      "applicationUrl": "https://localhost:44311/",
+      "applicationUrl": "http://localhost:8701",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -6,6 +6,7 @@ namespace eryaz.Products.Dto
     public class PagedProductResultRequestDto : PagedResultRequestDto
     {
         public string Keyword { get; set; }
+        public bool? IncludeDeleted { get; set; }
 
         public PagedProductResultRequestDto()
         {

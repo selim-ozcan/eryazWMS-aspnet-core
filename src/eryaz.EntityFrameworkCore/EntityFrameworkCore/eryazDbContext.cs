@@ -17,9 +17,9 @@ namespace eryaz.EntityFrameworkCore
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
-        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentHeader> DocumentHeaders { get; set; }
+        public DbSet<DocumentDetail> DocumentDetails { get; set; }
         public DbSet<Movement> Movements { get; set; }
-        public DbSet<DocumentMovementStatus> DocumentMovementStatuses { get; set; }
 
         public eryazDbContext(DbContextOptions<eryazDbContext> options)
             : base(options)

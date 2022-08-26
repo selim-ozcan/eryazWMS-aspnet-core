@@ -8,6 +8,7 @@ namespace eryaz.Products
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
         public string Brand { get; set; }
+
         public bool IsDeleted { get; set ; }
     }
 }

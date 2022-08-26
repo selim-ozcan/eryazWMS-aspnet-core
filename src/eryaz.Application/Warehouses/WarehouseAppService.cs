@@ -11,82 +11,98 @@ using Abp.Linq.Extensions;
 using Abp.UI;
 using eryaz.Warehouses.Dto;
 using eryaz.Warehouses;
+using eryaz.Documents;
 using eryaz.Movements;
+using Microsoft.EntityFrameworkCore;
+using Abp.Domain.Uow;
+using System.Linq.Expressions;
 
 namespace eryaz.Warehouses
 {
     public class WarehouseAppService : ApplicationService
     {
-        private readonly IRepository<Warehouse> _warehouseRepository;
-        private readonly IRepository<Movement> _movementRepository;
+        private readonly WarehouseManager _warehouseManager;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-        public WarehouseAppService(IRepository<Warehouse> warehouseRepository, IRepository<Movement> movementRepository)
+        public WarehouseAppService(
+            WarehouseManager warehouseManager,
+            IUnitOfWorkManager unitOfWorkManager)
         {
-            _warehouseRepository = warehouseRepository;
-            _movementRepository = movementRepository;
+            _warehouseManager = warehouseManager;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
-        public async Task CreateWarehouse(CreateWarehouseDto input)
+        public async Task CreateWarehouseAsync(CreateWarehouseDto input)
         {
-            var warehouse = await _warehouseRepository.FirstOrDefaultAsync(p => p.WarehouseCode == input.WarehouseCode);
-            if (warehouse != null)
+            var newWarehouse = ObjectMapper.Map<Warehouse>(input);
+            await _warehouseManager.CreateWarehouseAsync(newWarehouse);
+        }
+
+        public async Task<WarehouseDto> GetWarehouseAsync(int Id)
+        {
+            var warehouse = await _warehouseManager.GetWarehouseWhereAsync(warehouse => warehouse.Id == Id);
+            var newWarehouse = ObjectMapper.Map<WarehouseDto>(warehouse);
+            return newWarehouse;
+        }
+
+        public async Task<List<WarehouseDto>> GetAllWarehousesAsync()
+        {
+            var warehouses = _warehouseManager.GetAllWarehouses();
+            return ObjectMapper.Map<List<WarehouseDto>>(await warehouses.ToListAsync());
+
+        }
+
+        public async Task<PagedResultDto<WarehouseDto>> GetAllWarehousesPagedAsync(PagedWarehouseResultRequestDto input)
+        {
+            int count;
+            async Task<List<Warehouse>> GetAllWarehouses(params Expression<Func<Warehouse, bool>>[] predicates)
             {
-                throw new UserFriendlyException("Girilen depo koduna sahip bir depo mevcut.");
+                var warehouses = _warehouseManager.GetAllWarehouses(predicates).WhereIf(!string.IsNullOrEmpty(input.Keyword),
+                  warehouse =>
+                  warehouse.WarehouseName.Contains(input.Keyword) ||
+                  warehouse.WarehouseCode.Contains(input.Keyword));
+
+                count = warehouses.Count();
+                warehouses = warehouses.Skip(input.SkipCount).Take(input.MaxResultCount);
+
+                return await warehouses.ToListAsync();
             }
 
-            var newWarehouse = ObjectMapper.Map<Warehouse>(input);
-            await _warehouseRepository.InsertAsync(newWarehouse);
-        }
-
-        public async Task<WarehouseDto> GetWarehouse(int id)
-        {
-            var warehouse = await _warehouseRepository.FirstOrDefaultAsync(w => w.Id == id);
-            return ObjectMapper.Map<WarehouseDto>(warehouse);
-        }
-
-        public async Task<List<WarehouseDto>> GetAllWarehouses()
-        {
-            var warehouses = await _warehouseRepository.GetAllListAsync();
-            return ObjectMapper.Map<List<WarehouseDto>>(warehouses);
-
-        }
-
-        public PagedResultDto<WarehouseDto> GetAllWarehousesPaged(PagedWarehouseResultRequestDto input)
-        {
-            var warehouses = _warehouseRepository.GetAll()
-            .WhereIf(!input.Keyword.IsNullOrWhiteSpace(), x => x.WarehouseName.Contains(input.Keyword));
-            var count = warehouses.Count();
+            List<Warehouse> warehousesToReturn;
+            if (input.IncludeDeleted == null)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    warehousesToReturn = await GetAllWarehouses();
+                }
+            }
+            else if (input.IncludeDeleted == true)
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.SoftDelete))
+                {
+                    warehousesToReturn = await GetAllWarehouses(warehouse => warehouse.IsDeleted == true);
+                }
+            }
+            else
+            {
+                warehousesToReturn = await GetAllWarehouses();
+            }
 
             return new PagedResultDto<WarehouseDto>
             {
-                Items = ObjectMapper.Map<List<WarehouseDto>>(warehouses.ToList()),
+                Items = ObjectMapper.Map<List<WarehouseDto>>(warehousesToReturn),
                 TotalCount = count,
             };
         }
 
         public async Task UpdateWarehouse(WarehouseDto input)
         {
-            var warehouse = await _warehouseRepository.FirstOrDefaultAsync(p => p.WarehouseCode == input.WarehouseCode);
-            var warehouseOld = await _warehouseRepository.FirstOrDefaultAsync(p => p.Id == input.Id);
-            if (warehouse != null && warehouseOld.Id != warehouse.Id)
-            {
-                throw new UserFriendlyException("Girilen stok koduna sahip bir ürün mevcut.");
-            }
-
-            ObjectMapper.Map(input, warehouseOld);
-
-            await _warehouseRepository.UpdateAsync(warehouseOld);
+            await _warehouseManager.UpdateWarehouseAsync(ObjectMapper.Map<Warehouse>(input));
         }
 
         public async Task DeleteWarehouse(int id)
         {
-            var movements = _movementRepository.GetAllIncluding(m => m.Warehouse).Where(m => m.Warehouse.Id == id).ToList();
-            if (movements.Count > 0)
-            {
-                throw new UserFriendlyException("Ambar üzerinde stok hareketi bulunmaktadır!");
-            }
-
-            await _warehouseRepository.DeleteAsync(id);
+            await _warehouseManager.DeleteWarehouseAsync(id);
         }
     }
 }

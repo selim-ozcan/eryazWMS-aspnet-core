@@ -9,7 +9,7 @@ using Abp.Application.Services.Dto;
 namespace eryaz.Customers.Dto
 {
     [AutoMap(typeof(Customer))]
-    public class CreateCustomerDto : EntityDto<int>
+    public class CreateCustomerDto
     {
         public string CustomerCode { get; set; }
         public string Title { get; set; }

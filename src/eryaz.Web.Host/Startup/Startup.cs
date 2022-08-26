@@ -20,6 +20,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using System.IO;
+using eryaz.Web.Host.Middleware;
 
 namespace eryaz.Web.Host.Startup
 {
@@ -92,7 +93,12 @@ namespace eryaz.Web.Host.Startup
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            
+
             app.UseAbp(options => { options.UseAbpRequestLocalization = false; }); // Initializes ABP framework.
+
+            //// custom middleware.
+            //app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseCors(_defaultCorsPolicyName); // Enable CORS!
 
@@ -103,7 +109,6 @@ namespace eryaz.Web.Host.Startup
             app.UseAuthentication();
 
             app.UseAbpRequestLocalization();
-
 
             app.UseEndpoints(endpoints =>
             {
@@ -124,6 +129,8 @@ namespace eryaz.Web.Host.Startup
                     .GetManifestResourceStream("eryaz.Web.Host.wwwroot.swagger.ui.index.html");
                 options.DisplayRequestDuration(); // Controls the display of the request duration (in milliseconds) for "Try it out" requests.  
             }); // URL: /swagger
+
+
         }
         
         private void ConfigureSwagger(IServiceCollection services)

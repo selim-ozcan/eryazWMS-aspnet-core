@@ -6,7 +6,7 @@ using eryaz.Products;
 namespace eryaz.Products.Dto
 {
     [AutoMap(typeof(Product))]
-    public class CreateProductDto : EntityDto<int>
+    public class CreateProductDto
     {
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
